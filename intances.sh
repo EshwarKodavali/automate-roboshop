@@ -1,5 +1,5 @@
 #!/bin/bash
-AMI_ID="09c813fb71547fc4f"
+AMI_ID="ami-09c813fb71547fc4f"
 SG_ID="sg-0b119592ed33e5705"
 ZONE_ID="Z05515612OU5U0TGKWIRY"
 DOMAIN="eshwar.fun"
