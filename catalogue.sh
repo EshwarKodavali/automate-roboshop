@@ -56,11 +56,12 @@ VALIDATE $? "Getting the URL"
 cd /app
 VALIDATE $? "Moving to directory"
 
-rm -rf /app*
+rm -rf /app/*
 VALIDATE $? "removing everthing in that directory"
 
 unzip /tmp/catalogue.zip &>>$LOG_FILE
-VALIDATE $? "unzipping the file"
+VALIDATE $? "unzip catalogue"
+
 
 npm install &>>$LOG_FILE
 VALIDATE $? "installing NPM"
