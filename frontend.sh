@@ -54,6 +54,8 @@ cd /usr/share/nginx/html
 unzip /tmp/frontend.zip &>>$LOG_FILE
 VALIDATE $? "unzipped"
 
+rm -rf /etc/nginx/nginx.conf
+
 cp $HOME_PATH/frontend.repo /etc/nginx/nginx.conf
 
 systemctl restart nginx
