@@ -6,6 +6,7 @@ G="\e[32m"
 Y="\e[33m"
 N="\e[0m"
 HOME_PATH=$PWD
+START_TIME=$(date +%s)
 
 LOG_FOLDER="/var/log/shell-script"
 SCRIPT_NAME=$(echo $0 | cut -d "." -f1)
@@ -91,3 +92,7 @@ fi
 
 systemctl restart catalogue
 VALIDATE $? "Restarted catalogue"
+
+END_TIME=$(date +%s)
+TOTAL_TIME=$(( $END_TIME - $START_TIME ))
+echo -e "Script executed in: $Y $TOTAL_TIME Seconds $N"
