@@ -47,6 +47,6 @@ VALIDATE $? "Downloading frontend"
 rm -rf /etc/nginx/nginx.conf
 cp $SCRIPT_DIR/frontend.conf /etc/nginx/nginx.conf
 VALIDATE $? "Copying nginx.conf"
-systemctl enable nginx  &>>$LOG_FILE
+
 systemctl restart nginx 
 VALIDATE $? "Restarting Nginx"
