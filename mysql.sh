@@ -22,26 +22,26 @@ fi
 
 VALIDATE(){
     if [ $1 -ne 0 ]; then
-        echo -e "$2 ... $R FAILURE $N"
+        echo -e "$2 ... $G FAILURE $N"
     else
-        echo -e "$2 ... $R SUCCESS $N"
+        echo -e "$2 ... $G SUCCESS $N"
     
     fi
 }
 
-dnf install mysql-server -y
+dnf install mysql-server -y &>>$LOG_FILE
 VALIDATE $? "installing mysql"
 
 
 systemctl enable mysqld
-systemctl start mysqld
+systemctl start mysqld &>>$LOG_FILE
 VALIDATE $? "started mysql" 
 
 mysql_secure_installation --set-root-pass RoboShop@1
 VALIDATE $? "password set"
 
 END_TIME=$(date +%s)
-DURATION=$(($START_TIME-$END_TIME))
+DURATION=$(($END_TIME-$START_TIME))
 echo "Duration: $DURATION seconds"
 
 
