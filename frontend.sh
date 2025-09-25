@@ -1,32 +1,31 @@
 #!/bin/bash
 
-USER_ID=$(id -u)
+USERID=$(id -u)
 R="\e[31m"
 G="\e[32m"
 Y="\e[33m"
 N="\e[0m"
-HOME_PATH=$PWD
 
-LOG_FOLDER="/var/log/shell-script"
-SCRIPT_NAME=$(echo $0 | cut -d "." -f1)
-LOG_FILE="$LOG_FOLDER/$SCRIPT_NAME.log"
+LOGS_FOLDER="/var/log/shell-roboshop"
+SCRIPT_NAME=$( echo $0 | cut -d "." -f1 )
+SCRIPT_DIR=$PWD
+MONGODB_HOST=mongodb.eshwar.fun
+LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log" # /var/log/shell-script/16-logs.log
 
-mkdir -p $LOG_FOLDER
-echo "Script started executed at: $(date)"
+mkdir -p $LOGS_FOLDER
+echo "Script started executed at: $(date)" | tee -a $LOG_FILE
 
-if [ $USER_ID -ne 0 ]; then
-    echo -e "$R This is not a Root USER $N"
-    exit 1
-else
-    echo -e "This is a root user u can $G PROCEED $N"
+if [ $USERID -ne 0 ]; then
+    echo "ERROR:: Please run this script with root privelege"
+    exit 1 # failure is other than 0
 fi
 
-VALIDATE(){
+VALIDATE(){ # functions receive inputs through args just like shell script args
     if [ $1 -ne 0 ]; then
-        echo -e "$2 is $R failure STOP.. $N"
+        echo -e "$2 ... $R FAILURE $N" | tee -a $LOG_FILE
         exit 1
     else
-        echo -e "$2 is $G Success you can proceed.. $N"
+        echo -e "$2 ... $G SUCCESS $N" | tee -a $LOG_FILE
     fi
 }
 
@@ -36,11 +35,8 @@ dnf install nginx -y &>>$LOG_FILE
 VALIDATE $? "Installing Nginx"
 
 systemctl enable nginx  &>>$LOG_FILE
-VALIDATE $? "enabled Nginx"
-
 systemctl start nginx 
 VALIDATE $? "Starting Nginx"
-
 
 rm -rf /usr/share/nginx/html/* 
 curl -o /tmp/frontend.zip https://roboshop-artifacts.s3.amazonaws.com/frontend-v3.zip &>>$LOG_FILE
@@ -49,8 +45,8 @@ unzip /tmp/frontend.zip &>>$LOG_FILE
 VALIDATE $? "Downloading frontend"
 
 rm -rf /etc/nginx/nginx.conf
-cp $HOME_PATH/frontend.conf /etc/nginx/nginx.conf
-VALIDATE $? "Copying frontend.conf"
+cp $SCRIPT_DIR/frontend.conf /etc/nginx/nginx.conf
+VALIDATE $? "Copying nginx.conf"
 
 systemctl restart nginx 
 VALIDATE $? "Restarting Nginx"
