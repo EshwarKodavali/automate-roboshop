@@ -30,33 +30,24 @@ VALIDATE(){
     fi
 }
 
-dnf module list nginx &>>$LOG_FILE
-
 dnf module disable nginx -y &>>$LOG_FILE
-VALIDATE $? "Disable nginx"
-
 dnf module enable nginx:1.24 -y &>>$LOG_FILE
-VALIDATE $? "enable nginx"
-
 dnf install nginx -y &>>$LOG_FILE
-VALIDATE $? "install nginx"
+VALIDATE $? "Installing Nginx"
 
-systemctl enable nginx
+systemctl enable nginx  &>>$LOG_FILE
 systemctl start nginx 
+VALIDATE $? "Starting Nginx"
 
-rm -rf /usr/share/nginx/html/*
-VALIDATE $? "removed"
-
+rm -rf /usr/share/nginx/html/* 
 curl -o /tmp/frontend.zip https://roboshop-artifacts.s3.amazonaws.com/frontend-v3.zip &>>$LOG_FILE
-VALIDATE $? "copied code"
-
 cd /usr/share/nginx/html 
 unzip /tmp/frontend.zip &>>$LOG_FILE
-VALIDATE $? "unzipped"
+VALIDATE $? "Downloading frontend"
 
 rm -rf /etc/nginx/nginx.conf
+cp $HOME_PATH/frontend.conf /etc/nginx/nginx.conf
+VALIDATE $? "Copying frontend.conf"
 
-cp $HOME_PATH/frontend.repo /etc/nginx/nginx.conf
-
-systemctl restart nginx
-VALIDATE $? "started nginx"
+systemctl restart nginx 
+VALIDATE $? "Restarting Nginx"
