@@ -1,0 +1,73 @@
+USER_ID=$(id -u)
+R="\e[31m"
+G="\e[32m"
+Y="\e[33m"
+N="\e[0m"
+START_TIME=$(date +%s)
+HOME_PATH=$PWD
+
+
+LOG_FOLDER="/var/log/shell-roboshop"
+SCRIPT_NAME=$(echo $0 | cut -d "." -f1)
+LOG_FILE="$LOG_FOLDER/$SCRIPT_NAME.log"
+
+mkdir -p $LOG_FOLDER
+
+echo "Script started executed at: $(date)"
+
+if [ $USER_ID -ne 0 ]; then
+    echo "please use root access"
+    exit 1
+else
+    echo "It is a root access"
+fi
+
+VALIDATE(){
+    if [ $1 -ne 0 ]; then
+        echo -e "$2 ... $G FAILURE $N"
+    else
+        echo -e "$2 ... $G SUCCESS $N"
+    
+    fi
+}
+
+dnf module disable nodejs -y &>>$LOG_FILE
+dnf module enable nodejs:20 -y &>>$LOG_FILE
+
+dnf install nodejs -y &>>$LOG_FILE
+VALIDATE $? "installed"
+
+id roboshop &>>$LOG_FILE
+if [ $? -ne 0 ]; then
+    useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>$LOG_FILE
+    VALIDATE $? "User established"
+else
+    echo -e "user already exists $Y SKIPPING $N"
+fi
+
+mkdir -p /app 
+
+curl -o /tmp/cart.zip https://roboshop-artifacts.s3.amazonaws.com/cart-v3.zip &>>$LOG_FILE
+VALIDATE $? "Downloading cart application"
+
+cd /app 
+VALIDATE $? "Changing to app directory"
+
+rm -rf /app/*
+VALIDATE $? "Removing existing code"
+
+unzip /tmp/cart.zip &>>$LOG_FILE
+VALIDATE $? "unzip cart"
+
+npm install &>>$LOG_FILE
+VALIDATE $? "Install dependencies"
+
+cp $HOME_PATH/cart.service /etc/systemd/system/cart.service
+VALIDATE $? "Copy systemctl service"
+
+systemctl daemon-reload
+systemctl enable cart &>>$LOG_FILE
+VALIDATE $? "Enable cart"
+
+systemctl restart cart
+VALIDATE $? "Restarted cart"
